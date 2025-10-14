@@ -1,0 +1,36 @@
+export const BANNER_IMAGES = [
+  {
+    Row_Id: 6,
+    Org_Id: 1,
+    Title: "Test Banner",
+    Description: "",
+    Image: "icons8-clock-24_1758954910563.png",
+    Url: "",
+    Date: "2025-09-26T18:30:00.000Z",
+    Added_On: "2025-09-27T06:35:10.000Z",
+    Added_By: "Mateen Ansari",
+  },
+  {
+    Row_Id: 3,
+    Org_Id: 1,
+    Title: "Banner",
+    Description: "\u003Cp\u003Eadd banner\u003C/p\u003E",
+    Image: "download_1746517387864.jpeg",
+    Url: "https://web.masysiclass.com/viewBannerImages",
+    Date: "2025-05-05T18:30:00.000Z",
+    Added_On: "2025-05-06T07:43:07.000Z",
+    Added_By: "Mateen Ansari",
+  },
+  {
+    Row_Id: 1,
+    Org_Id: 1,
+    Title: "Title",
+    Description:
+      "\u003Cp\u003E\u003Cstrong\u003Ehi\u003C/strong\u003E\u003C/p\u003E",
+    Image: "download (1)_1724828642243.jpeg",
+    Url: "http://localhost:3000/addBannerImages ",
+    Date: "2024-08-27T18:30:00.000Z",
+    Added_On: "2024-08-28T07:04:05.000Z",
+    Added_By: "Mateen Ansari",
+  },
+];

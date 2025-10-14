@@ -1,0 +1,32 @@
+export const CATEGORIES = [
+  {
+    Category_ID: 20470,
+    CategoryName: "Light Bill",
+    Head_Id: "4",
+    Head_Name: "MASYS GROUP",
+    Subhead_Id: "",
+    Subhead_Name: "",
+    Date_Added: "2025-08-22T06:49:28.000Z",
+    Org_Id: 1,
+  },
+  {
+    Category_ID: 20471,
+    CategoryName: "Router Connection Bill",
+    Head_Id: "4",
+    Head_Name: "MASYS GROUP",
+    Subhead_Id: "",
+    Subhead_Name: "",
+    Date_Added: "2025-08-21T06:49:28.000Z",
+    Org_Id: 1,
+  },
+  {
+    Category_ID: 20472,
+    CategoryName: "Office Rent",
+    Head_Id: "4",
+    Head_Name: "MASYS GROUP",
+    Subhead_Id: "",
+    Subhead_Name: "",
+    Date_Added: "2025-08-25T06:49:28.000Z",
+    Org_Id: 1,
+  },
+];

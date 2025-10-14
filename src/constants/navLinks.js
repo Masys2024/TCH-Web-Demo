@@ -50,7 +50,7 @@ import {
 } from "lucide-react";
 
 const NAVLINKS = [
-  { label: "Home", href: "/home" },
+  // { label: "Home", href: "/home" },
   {
     label: "Students",
     href: "#",

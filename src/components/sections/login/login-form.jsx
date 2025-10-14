@@ -15,6 +15,7 @@ import { toast } from "sonner";
 // import { useAuth } from "@/contexts/AuthContext";
 import { LoginLogo } from "@/components/blocks/logo";
 import { useRouter } from "next/navigation";
+import { INTERNAL_LINKS } from "@/constants/navLinks";
 
 export function LoginForm({ className, ...props }) {
   // const { Login } = useAuth();
@@ -37,7 +38,7 @@ export function LoginForm({ className, ...props }) {
         loading: "Signing in...",
         success: () => {
           setLoading(false);
-          router.push("/home");
+          router.push(INTERNAL_LINKS.ACTIVE_STUDENTS);
           return `Welcome back, ${formData.username}!`;
         },
         error: "Error during login",

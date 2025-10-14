@@ -36,7 +36,7 @@ export default function Page() {
         )}
       >
         <Image
-          src={"/login_bg.png"}
+          src={"/login_bg.svg"}
           className="w-[600px] h-auto"
           width={724}
           height={851}

@@ -374,6 +374,10 @@ const NAVLINKS = [
             href: "/settings/batches",
           },
           {
+            label: "Branches",
+            href: "/settings/branches",
+          },
+          {
             label: "Subject",
             href: "/settings/subject",
           },

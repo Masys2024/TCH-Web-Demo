@@ -12,7 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CircleFadingPlus } from "lucide-react";
 
-export default function AddClassroomForm({ formData, setFormData }) {
+export default function AddClassroomForm({
+  formData,
+  setFormData,
+  loadingState,
+  handleAdd,
+  update = false,
+}) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -31,11 +37,24 @@ export default function AddClassroomForm({ formData, setFormData }) {
             <DialogTitle>Classroom</DialogTitle>
           </DialogHeader>
           <div className="w-full grid grid-cols-2 gap-4 py-6">
+            {/* Code */}
+            <div className="w-full grid gap-3">
+              <Label className={"w-full"}>Code</Label>
+              <Input
+                name="code"
+                value={formData.code}
+                onChange={handleChange}
+                placeholder="Enter Code"
+                className={"w-full"}
+              />
+            </div>
+
+            {/* Room Name */}
             <div className="w-full grid gap-3">
               <Label className={"w-full"}>Room Name</Label>
               <Input
-                name="room_name"
-                value={formData.room_name}
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 placeholder="Enter Room Name"
                 className={"w-full"}
@@ -46,7 +65,19 @@ export default function AddClassroomForm({ formData, setFormData }) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit">Add</Button>
+            {update ? (
+              <Button
+                type="submit"
+                disabled={loadingState}
+                onClick={handleUpdate}
+              >
+                {loadingState ? "Updating" : "Update"}
+              </Button>
+            ) : (
+              <Button type="submit" disabled={loadingState} onClick={handleAdd}>
+                {loadingState ? "Adding" : "Add"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </form>

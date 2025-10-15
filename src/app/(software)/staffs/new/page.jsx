@@ -4,13 +4,16 @@ import AddStaffForm from "@/components/sections/staff/new/add-staff-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { INTERNAL_LINKS } from "@/constants/navLinks";
+import { createTeachers } from "@/lib/apis/teachers";
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
+import { toast } from "sonner";
 
 export default function AddStaff() {
   const [personalDetails, setPersonalDetails] = useState({
     staffId: 16,
+    code: "",
     firstName: "",
     middleName: "",
     lastName: "",
@@ -46,6 +49,34 @@ export default function AddStaff() {
     addressProof: null,
   });
 
+  const [loadingState, setLoadingState] = useState(false);
+
+  const handleAdd = async () => {
+    setLoadingState(true);
+    try {
+      await toast.promise(
+        createTeachers({
+          code: personalDetails.code,
+          firstName: personalDetails.firstName,
+          lastName: personalDetails.lastName,
+        }),
+        {
+          loading: "Uploading teacher...",
+          success: () => {
+            resetForm();
+            return "Teacher added to the master.";
+          },
+          error: "Error uploading data to the master.",
+        }
+      );
+    } catch (error) {
+      console.log(error);
+      toast.error("Error Uploading Data to the master");
+    } finally {
+      setLoadingState(false);
+    }
+  };
+
   return (
     <section className="p-6 max-w-7xl mx-auto">
       <div className="w-full pb-8 flex items-center justify-between">
@@ -65,6 +96,8 @@ export default function AddStaff() {
             setPayrollDetails={setPayrollDetails}
             documentsUpload={documentsUpload}
             setDocumentsUpload={setDocumentsUpload}
+            handleUpload={handleAdd}
+            loadingState={loadingState}
           />
         </CardContent>
       </Card>

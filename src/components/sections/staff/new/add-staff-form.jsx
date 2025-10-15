@@ -24,6 +24,8 @@ export default function AddStaffForm({
   setPayrollDetails,
   documentsUpload,
   setDocumentsUpload,
+  handleUpload,
+  loadingState
 }) {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({});
@@ -58,6 +60,7 @@ export default function AddStaffForm({
       console.log(formData);
       setStep(0);
       setFormData({});
+      handleUpload();
       alert("Form successfully submitted");
     }
   };
@@ -89,7 +92,7 @@ export default function AddStaffForm({
                 className={cn(
                   "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ease-in-out border-2 bg-background",
                   index < step &&
-                    "bg-primary border-primary text-primary-foreground",
+                  "bg-primary border-primary text-primary-foreground",
                   index === step && "border-primary text-primary",
                   index > step && "border-muted text-muted-foreground"
                 )}

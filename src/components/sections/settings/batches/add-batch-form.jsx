@@ -15,7 +15,13 @@ import { STANDARDS } from "@/constants/data/standards";
 import { CircleFadingPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export default function AddBatchForm({ formData, setFormData }) {
+export default function AddBatchForm({
+  formData,
+  setFormData,
+  loadingState,
+  handleAdd,
+  update = false,
+}) {
   const [standards, setStandards] = useState([]);
 
   const handleChange = (e) => {
@@ -47,7 +53,7 @@ export default function AddBatchForm({ formData, setFormData }) {
           </DialogHeader>
           <div className="w-full grid grid-cols-2 gap-4 py-6">
             {/* Standard */}
-            <div className="w-full grid gap-2">
+            {/* <div className="w-full grid gap-2">
               <Label>Standard</Label>
               <DatalistSingle
                 options={standards}
@@ -57,14 +63,26 @@ export default function AddBatchForm({ formData, setFormData }) {
                 }
                 placeholder="Select a standard..."
               />
+            </div> */}
+
+            {/* Code */}
+            <div className="w-full grid gap-3">
+              <Label className={"w-full"}>Code</Label>
+              <Input
+                name="code"
+                value={formData.code}
+                onChange={handleChange}
+                placeholder="Enter Code"
+                className={"w-full"}
+              />
             </div>
 
             {/* Batch Name */}
             <div className="w-full grid gap-3">
               <Label className={"w-full"}>Batch Name</Label>
               <Input
-                name="batch_name"
-                value={formData.batch_name}
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 placeholder="Enter Batch Name"
                 className={"w-full"}
@@ -75,7 +93,19 @@ export default function AddBatchForm({ formData, setFormData }) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit">Add</Button>
+            {update ? (
+              <Button
+                type="submit"
+                disabled={loadingState}
+                onClick={handleUpdate}
+              >
+                {loadingState ? "Updating" : "Update"}
+              </Button>
+            ) : (
+              <Button type="submit" disabled={loadingState} onClick={handleAdd}>
+                {loadingState ? "Adding" : "Add"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </form>

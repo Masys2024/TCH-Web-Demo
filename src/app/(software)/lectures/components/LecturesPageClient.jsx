@@ -1,9 +1,9 @@
 "use client";
-
 import DateFilter from "@/components/blocks/DateFilter";
 import TimeTableCard from "@/components/blocks/timetable/time-table-card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { fetchSchedules } from "@/lib/apis/lectureSchedules";
 import sortScheduleByDate from "@/lib/sortSchedule";
 import { transformToTimetableFormat } from "@/lib/transform-to-timetable";
 import React, { useEffect, useState } from "react";
@@ -16,9 +16,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BRANCHES } from "@/constants/data/branches";
-import { LECTURES } from "@/constants/data/lectures";
-import { useSearchParams } from "next/navigation";
+import { fetchBranches } from "@/lib/apis/branches";
+import Link from "next/link";
+import { INTERNAL_LINKS } from "@/constants/navLinks";
+import { Button } from "@/components/ui/button";
+import { CircleFadingPlus } from "lucide-react";
 
 const start_Of_Week = (date) => {
   const d = new Date(date);
@@ -26,18 +28,12 @@ const start_Of_Week = (date) => {
   return new Date(d.setDate(diff));
 };
 
-export default function LecturesPageClient() {
-  const searchParams = useSearchParams();
-  const teacherSearchQuery = searchParams.get("teacher");
-  const subjectSearchQuery = searchParams.get("subject");
-  const roomSearchQuery = searchParams.get("room");
-  const batchSearchQuery = searchParams.get("batch");
+export default function LecturesDisplay() {
   const [originalData, setOriginalData] = useState([]);
   const [displayData, setDisplayData] = useState([]);
   const [Branches, setBranches] = useState([]);
 
   // Filters
-
   const [dateFilter, setDateFilter] = useState({
     startDate: start_Of_Week(new Date()),
     endDate: new Date(),
@@ -54,23 +50,31 @@ export default function LecturesPageClient() {
   // Original Data Fetch
   useEffect(() => {
     const fetchData = async () => {
-      const schedules_data = LECTURES;
-      const branches_data = BRANCHES;
-      setOriginalData(schedules_data);
-      setBranches(branches_data);
-      const startDate = start_Of_Week(new Date());
-      const endDate = new Date(
-        startDate.getFullYear(),
-        startDate.getMonth(),
-        startDate.getDate() + 6,
-        23,
-        59,
-        59,
-        999
-      );
-      setDateFilter({ startDate, endDate, preset: "thisWeek" });
-    };
+      const results = await Promise.allSettled([
+        fetchSchedules(),
+        fetchBranches(),
+      ]);
+      const [schedules_data, branches_data] = results;
+      if (schedules_data?.value?.returncode === 200) {
+        setOriginalData(schedules_data?.value?.output);
 
+        const startDate = start_Of_Week(new Date());
+        const endDate = new Date(
+          startDate.getFullYear(),
+          startDate.getMonth(),
+          startDate.getDate() + 6,
+          23,
+          59,
+          59,
+          999
+        );
+        setDateFilter({ startDate, endDate, preset: "thisWeek" });
+      }
+
+      if (branches_data?.value?.returncode === 200) {
+        setBranches(branches_data?.value?.output);
+      }
+    };
     fetchData();
   }, []);
 
@@ -91,30 +95,30 @@ export default function LecturesPageClient() {
     }
 
     // Teacher Filter
-    if (filter.teacher || teacherSearchQuery) {
+    if (filter.teacher) {
       filtered_data = filtered_data?.filter((item) =>
-        item?.teachers?.code?.includes(filter.teacher || teacherSearchQuery)
+        item?.teachers?.code?.includes(filter.teacher)
       );
     }
 
     // Subject Filter
-    if (filter.subject || subjectSearchQuery) {
+    if (filter.subject) {
       filtered_data = filtered_data?.filter((item) =>
-        item?.subjects?.code?.includes(filter.subject || subjectSearchQuery)
+        item?.subjects?.code?.includes(filter.subject)
       );
     }
 
     // Room Filter
-    if (filter.room || roomSearchQuery) {
+    if (filter.room) {
       filtered_data = filtered_data?.filter((item) =>
-        item?.rooms?.code?.includes(filter.room || roomSearchQuery)
+        item?.rooms?.code?.includes(filter.room)
       );
     }
 
     // Batch Filter
-    if (filter.batch || batchSearchQuery) {
+    if (filter.batch) {
       filtered_data = filtered_data?.filter((item) =>
-        item?.batches?.code?.includes(filter.batch || batchSearchQuery)
+        item?.batches?.code?.includes(filter.batch)
       );
     }
 
@@ -131,10 +135,6 @@ export default function LecturesPageClient() {
     filter.room,
     filter.batch,
     filter.branch,
-    roomSearchQuery,
-    teacherSearchQuery,
-    batchSearchQuery,
-    subjectSearchQuery,
   ]);
 
   const filterByDatePreset = (data, preset) => {
@@ -278,6 +278,12 @@ export default function LecturesPageClient() {
           </Select>
 
           <DateFilter dateFilter={dateFilter} onFilterChange={setDateFilter} />
+
+          <Link href={INTERNAL_LINKS.ADD_LECTURES}>
+            <Button>
+              Add <CircleFadingPlus className="size-4" />
+            </Button>
+          </Link>
         </div>
       </div>
 

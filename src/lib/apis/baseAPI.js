@@ -11,6 +11,7 @@ const defaultHeaders = {
  */
 export async function apiFetch(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
+  console.log(url);
 
   const config = {
     method: options.method || "GET",

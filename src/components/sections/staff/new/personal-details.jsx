@@ -22,6 +22,7 @@ import {
 export default function PersonalDetails({ formData, setFormData }) {
   const [errorText, setErrorText] = useState({
     staffId: "",
+    code: "",
     firstName: "",
     middleName: "",
     lastName: "",
@@ -48,8 +49,9 @@ export default function PersonalDetails({ formData, setFormData }) {
       <CardContent>
         <div className="grid grid-cols-4 gap-4 pb-4">
           {/* Staff Id */}
+          {/* 
           <div className="w-full grid gap-2">
-            <Label>Staff Id</Label>
+            <Label>Staff Id</Label> 
             <Input
               disabled={true}
               type={"text"}
@@ -57,8 +59,22 @@ export default function PersonalDetails({ formData, setFormData }) {
               placeholder=""
               value={formData.staffId}
               onChange={handleChange}
-            />
+            /> 
             <p className="text-xs text-destructive">{errorText.staffId}</p>
+          </div>
+          */}
+
+          {/* Code */}
+          <div className="w-full grid gap-2">
+            <Label>Code</Label>
+            <Input
+              type={"text"}
+              name="code"
+              placeholder="Enter Code"
+              value={formData.code}
+              onChange={handleChange}
+            />
+            <p className="text-xs text-destructive">{errorText.code}</p>
           </div>
 
           {/* First Name */}

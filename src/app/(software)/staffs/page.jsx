@@ -17,18 +17,51 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+import { fetchTeachers } from "@/lib/apis/teachers";
 
 export default function StaffsPage() {
-  const data = STAFFS?.filter((staff) => staff.Role === "Teacher").map(
-    (staff) => ({
-      name: `${staff?.First_Name || ""} ${staff?.Middle_Name || ""} ${
-        staff?.Last_Name || ""
-      }`.trim(),
-      ...staff,
-    })
-  );
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await toast.promise(
+          (async () => {
+            const response = await fetchTeachers();
+
+            if (response?.returncode === 200) {
+              const output = response.output.map((staff) => ({
+                name: `${staff?.First_Name || staff?.firstName || ""} ${
+                  staff?.Middle_Name || ""
+                } ${staff?.Last_Name || staff?.lastName || ""}`.trim(),
+                ...staff,
+              }));
+              console.log("Data", output);
+              setData(output);
+            } else {
+              // optionally throw an error to trigger toast error
+              throw new Error("Failed to fetch teachers");
+            }
+
+            return response;
+          })(),
+          {
+            loading: "Fetching Staff...",
+            success: () => {
+              return "Fetched Data.";
+            },
+            error: "Error fetching data from the master.",
+          }
+        );
+      } catch (error) {
+        toast.error(error?.message || "Error Fetching Data...");
+      }
+    };
+    fetchData();
+  }, []);
 
   const columns = [
     {
@@ -43,11 +76,11 @@ export default function StaffsPage() {
                 : ""
             }
             onError={(e) => (e.target.style.display = "none")}
-            alt={`${row?.First_Name} ${row?.Last_Name}`}
+            alt={`${row?.firstName} ${row?.lastName}`}
           />
           <AvatarFallback>
-            {row?.original?.First_Name?.charAt(0)}
-            {row?.original?.Last_Name?.charAt(0)}
+            {row?.original?.firstName?.charAt(0)}
+            {row?.original?.lastName?.charAt(0)}
           </AvatarFallback>
         </Avatar>
       ),
@@ -65,31 +98,8 @@ export default function StaffsPage() {
       ),
     },
     {
-      accessorKey: "SinglePunch",
-      header: "Single Punch",
-      cell: ({ row }) => (
-        <span>{row?.original?.SinglePunch ? "Yes" : "No"}</span>
-      ),
-    },
-    {
-      accessorKey: "MonFri",
-      header: "Weekdays Shift",
-      cell: ({ row }) => (
-        <span>{`${row?.original?.MF_InTime} to ${row?.original?.MF_OutTime}`}</span>
-      ),
-    },
-    {
-      accessorKey: "Sat",
-      header: "Saturday Shift",
-      cell: ({ row }) => (
-        <span>{`${
-          row?.original?.Sat_InTime && `${row?.original?.Sat_InTime} to `
-        }${row?.original?.Sat_OutTime}`}</span>
-      ),
-    },
-    {
-      accessorKey: "WeekOff",
-      header: "WeekOff",
+      accessorKey: "code",
+      header: "Code",
     },
     {
       accessorKey: "actions",
@@ -167,3 +177,71 @@ export default function StaffsPage() {
     </section>
   );
 }
+
+// const columns = [
+//   {
+//     accessorKey: "Photo",
+//     header: "Photo",
+//     cell: ({ row }) => (
+//       <Avatar>
+//         <AvatarImage
+//           src={
+//             row?.original?.Photo !== ""
+//               ? `https://web.masysiclass.com/Documents/Student/Photos/${row?.original.Photo}`
+//               : ""
+//           }
+//           onError={(e) => (e.target.style.display = "none")}
+//           alt={`${row?.First_Name} ${row?.Last_Name}`}
+//         />
+//         <AvatarFallback>
+//           {row?.original?.First_Name?.charAt(0)}
+//           {row?.original?.Last_Name?.charAt(0)}
+//         </AvatarFallback>
+//       </Avatar>
+//     ),
+//   },
+//   {
+//     accessorKey: "name",
+//     header: "Name",
+//     cell: ({ row }) => (
+//       <Link
+//         href={`/staffs/profile/${row?.original?.ID}`}
+//         className="text-primary"
+//       >
+//         {row?.original?.name}
+//       </Link>
+//     ),
+//   },
+//   {
+//     accessorKey: "SinglePunch",
+//     header: "Single Punch",
+//     cell: ({ row }) => (
+//       <span>{row?.original?.SinglePunch ? "Yes" : "No"}</span>
+//     ),
+//   },
+//   {
+//     accessorKey: "MonFri",
+//     header: "Weekdays Shift",
+//     cell: ({ row }) => (
+//       <span>{`${row?.original?.MF_InTime} to ${row?.original?.MF_OutTime}`}</span>
+//     ),
+//   },
+//   {
+//     accessorKey: "Sat",
+//     header: "Saturday Shift",
+//     cell: ({ row }) => (
+//       <span>{`${
+//         row?.original?.Sat_InTime && `${row?.original?.Sat_InTime} to `
+//       }${row?.original?.Sat_OutTime}`}</span>
+//     ),
+//   },
+//   {
+//     accessorKey: "WeekOff",
+//     header: "WeekOff",
+//   },
+//   {
+//     accessorKey: "actions",
+//     header: "",
+//     cell: Actions,
+//   },
+// ];

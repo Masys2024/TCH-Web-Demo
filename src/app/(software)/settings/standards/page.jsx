@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { DataView } from "@/components/ui/data-table";
 import { SquarePen, EllipsisVertical, Trash2 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Popover,
   PopoverTrigger,
@@ -11,15 +11,52 @@ import {
 } from "@/components/ui/popover";
 import { STANDARDS } from "@/constants/data/standards";
 import AddStandardForm from "@/components/sections/settings/standards/add-standard-form";
+import { createStandards, fetchStandards } from "@/lib/apis/standards";
+import { toast } from "sonner";
 
 export default function StandardsPage() {
-  const data = STANDARDS.map((item, idx) => ({
-    srNo: idx + 1,
-    ...item,
-  }));
+  const [data, setData] = useState([]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await toast.promise(
+          (async () => {
+            const response = await fetchStandards();
+
+            if (response?.returncode === 200) {
+              const output = response.output.map((item, idx) => ({
+                srNo: idx + 1,
+                ...item,
+              }));
+              console.log("Data", output);
+              setData(output);
+            } else {
+              // optionally throw an error to trigger toast error
+              throw new Error("Failed to fetch");
+            }
+
+            return response;
+          })(),
+          {
+            loading: "Fetching Standard...",
+            success: () => {
+              return "Fetched Data.";
+            },
+            error: "Error fetching data from the master.",
+          }
+        );
+      } catch (error) {
+        toast.error(error?.message || "Error Fetching Data...");
+      }
+    };
+    fetchData();
+  }, []);
+
+  const [loadingState, setLoadingState] = useState(false);
   const [formData, setFormData] = useState({
-    standard_name: "",
+    name: "",
+    code: "",
   });
 
   const columns = [
@@ -28,7 +65,11 @@ export default function StandardsPage() {
       header: "Sr No.",
     },
     {
-      accessorKey: "Std_Name",
+      accessorKey: "code",
+      header: "Code",
+    },
+    {
+      accessorKey: "name",
       header: "Standard Name",
     },
     {
@@ -89,11 +130,42 @@ export default function StandardsPage() {
     );
   }
 
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      code: "",
+    });
+  };
+
+  const handleAdd = async () => {
+    setLoadingState(true);
+    try {
+      await toast.promise(createStandards(formData), {
+        loading: "Uploading standard...",
+        success: () => {
+          resetForm();
+          return "Standard added to the master.";
+        },
+        error: "Error uploading data to the master.",
+      });
+    } catch (error) {
+      console.log(error);
+      toast.error("Error Uploading Data to the master");
+    } finally {
+      setLoadingState(false);
+    }
+  };
+
   return (
     <section className="p-6 max-w-7xl mx-auto">
       <div className="w-full pb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Standards</h1>
-        <AddStandardForm formData={formData} setFormData={setFormData} />
+        <AddStandardForm
+          formData={formData}
+          setFormData={setFormData}
+          handleAdd={handleAdd}
+          loadingState={loadingState}
+        />
       </div>
 
       <DataView
@@ -110,3 +182,19 @@ export default function StandardsPage() {
     </section>
   );
 }
+
+// const columns = [
+//   {
+//     accessorKey: "srNo",
+//     header: "Sr No.",
+//   },
+//   {
+//     accessorKey: "Std_Name",
+//     header: "Standard Name",
+//   },
+//   {
+//     accessorKey: "actions",
+//     header: "",
+//     cell: Actions,
+//   },
+// ];

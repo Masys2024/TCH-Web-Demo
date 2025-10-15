@@ -9,15 +9,6 @@ import { INTERNAL_LINKS } from "@/constants/navLinks";
 export default function NewStudent() {
   const today = new Date().toISOString().split("T")[0];
   const [loadingState, setLoadingState] = useState(false);
-  const [enquiryDetails, setEnquiryDetails] = useState({
-    enquiryNo: 11,
-    source: "",
-    status: "",
-    academicYear: "",
-    nextFolloupDate: new Date().toISOString().split("T")[0],
-    assignedTo: "",
-  });
-
   const [studentDetails, setStudentDetails] = useState({
     admissionDate: new Date().toISOString().split("T")[0],
     firstName: "",

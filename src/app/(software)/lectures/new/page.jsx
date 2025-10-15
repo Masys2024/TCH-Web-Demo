@@ -8,24 +8,25 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Download, Upload } from "lucide-react";
+import { ArrowUpRight, Download, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { fetchTeachers } from "@/lib/apis/teachers";
+import { fetchSubjects } from "@/lib/apis/subjects";
+import { fetchRooms } from "@/lib/apis/rooms";
+import { fetchBatches } from "@/lib/apis/batches";
+import { createSchedules } from "@/lib/apis/lectureSchedules";
 import TimeTableCard from "@/components/blocks/timetable/time-table-card";
 import transformToTimetableLayout from "@/lib/transform-to-timetable";
+import { fetchBranches } from "@/lib/apis/branches";
+import { fetchStandards } from "@/lib/apis/standards";
 import Loader from "@/components/ui/loader";
-import { STAFFS } from "@/constants/data/staffs";
-import { SUBJECTS } from "@/constants/data/subjects";
-import { CLASSROOMS } from "@/constants/data/rooms";
-import { BATCHES } from "@/constants/data/batches";
-import { BRANCHES } from "@/constants/data/branches";
-import { STANDARDS } from "@/constants/data/standards";
-import XlsxUpload from "@/components/ui/xlsx-upload";
+import Link from "next/link";
+import { INTERNAL_LINKS } from "@/constants/navLinks";
 
 export default function TimetableUploader() {
   const [errorText, setErrorText] = useState("");
@@ -44,12 +45,42 @@ export default function TimetableUploader() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setTeachers(STAFFS?.filter((staff) => staff.Role === "Teacher"));
-        setSubjects(SUBJECTS);
-        setRooms(CLASSROOMS);
-        setBatches(BATCHES);
-        setBranches(BRANCHES);
-        setStandards(STANDARDS);
+        const results = await Promise.allSettled([
+          fetchTeachers(),
+          fetchSubjects(),
+          fetchRooms(),
+          fetchBatches(),
+          fetchBranches(),
+          fetchStandards(),
+        ]);
+
+        const [
+          teachers_data,
+          subjects_data,
+          rooms_data,
+          batches_data,
+          branches_data,
+          standards_data,
+        ] = results;
+
+        if (teachers_data?.value?.returncode === 200) {
+          setTeachers(teachers_data?.value?.output);
+        }
+        if (subjects_data?.value?.returncode === 200) {
+          setSubjects(subjects_data?.value?.output);
+        }
+        if (rooms_data?.value?.returncode === 200) {
+          setRooms(rooms_data?.value?.output);
+        }
+        if (batches_data?.value?.returncode === 200) {
+          setBatches(batches_data?.value?.output);
+        }
+        if (branches_data?.value?.returncode === 200) {
+          setBranches(branches_data?.value?.output);
+        }
+        if (standards_data?.value?.returncode === 200) {
+          setStandards(standards_data?.value?.output);
+        }
       } catch (error) {
         toast.error("Error Fetching Details");
       } finally {
@@ -79,6 +110,8 @@ export default function TimetableUploader() {
             );
           }
           const parsed = parseTimetableData(sheetData);
+          console.log(parsed);
+
           const remapped = remappingWithDB(parsed, {
             TEACHERS: teachers,
             ROOMS: rooms,
@@ -134,43 +167,54 @@ export default function TimetableUploader() {
     setLoadingState(true);
 
     try {
-      jsonData.forEach(async (data) => {
-        const batchId = batches?.find((b) => b.code === data.batch.value)?.id;
-        const branchId = branches?.find(
-          (b) => b.code === data.branch.value
-        )?.id;
-        const standardId = standards?.find(
-          (s) => s.code === data.standard.value
-        )?.id;
-        const teacherId = teachers?.find(
-          (t) => t.code === data.teacher.value
-        )?.id;
-        const subjectId = subjects?.find(
-          (s) => s.code === data.subject.value
-        )?.id;
-        const roomId = rooms?.find(
-          (r) => r.code === String(data.room.value)
-        )?.id;
+      await toast.promise(
+        () => {
+          jsonData.forEach(async (data) => {
+            const batchId = batches?.find(
+              (b) => b.code === data.batch.value
+            )?.id;
+            const branchId = branches?.find(
+              (b) => b.code === data.branch.value
+            )?.id;
+            const standardId = standards?.find(
+              (s) => s.code === data.standard.value
+            )?.id;
+            const teacherId = teachers?.find(
+              (t) => t.code === data.teacher.value
+            )?.id;
+            const subjectId = subjects?.find(
+              (s) => s.code === data.subject.value
+            )?.id;
+            const roomId = rooms?.find(
+              (r) => r.code === String(data.room.value)
+            )?.id;
 
-        const formData = {
-          date: data.date.value,
-          day: data.day.value,
-          time_in: data.time_in.value,
-          time_out: data.time_out.value,
-          topic: data.topic.value,
-          ...(batchId && { batch: batchId }),
-          ...(branchId && { branch: branchId }),
-          ...(standardId && { standard: standardId }),
-          ...(teacherId && { teacher: teacherId }),
-          ...(subjectId && { subject: subjectId }),
-          ...(roomId && { room: roomId }),
-        };
-        console.log(formData);
+            const formData = {
+              date: data.date.value,
+              day: data.day.value,
+              time_in: data.time_in.value,
+              time_out: data.time_out.value,
+              topic: data.topic.value,
+              ...(batchId && { batch: batchId }),
+              ...(branchId && { branch: branchId }),
+              ...(standardId && { standard: standardId }),
+              ...(teacherId && { teacher: teacherId }),
+              ...(subjectId && { subject: subjectId }),
+              ...(roomId && { room: roomId }),
+            };
+            console.log(formData);
 
-        // await createSchedules(formData);
-      });
-
-      toast.success("Data Uploaded!!");
+            await createSchedules(formData);
+          });
+        },
+        {
+          loading: "Uploading lectures...",
+          success: () => {
+            return "All Lectures uploaded.";
+          },
+          error: "Error uploading data.",
+        }
+      );
     } catch (error) {
       console.log(error);
       toast.error("Error Uploading Schedule");
@@ -189,8 +233,13 @@ export default function TimetableUploader() {
         <CardTitle className={"text-2xl"}>
           Upload Timetable Excel File
         </CardTitle>
-        <CardAction>
+        <CardAction className={"flex items-center gap-4"}>
           <SampleExcelDownload />
+          <Link href={INTERNAL_LINKS.VIEW_LECTURES}>
+            <Button>
+              View <ArrowUpRight className="size-4" />
+            </Button>
+          </Link>
         </CardAction>
       </CardHeader>
       <CardContent>
@@ -233,7 +282,7 @@ const SampleExcelDownload = () => {
   };
 
   return (
-    <Button onClick={handleDownload}>
+    <Button variant={"outline"} onClick={handleDownload}>
       Download Sample <Download />
     </Button>
   );

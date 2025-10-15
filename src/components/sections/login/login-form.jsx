@@ -37,7 +37,7 @@ export function LoginForm({ className, ...props }) {
       await toast.promise(sleep(2000), {
         loading: "Signing in...",
         success: () => {
-          if (!formData.username === "admin" && !formData.pass === "admin") {
+          if (formData.username === "admin" && formData.pass === "admin") {
             router.push(INTERNAL_LINKS.ACTIVE_STUDENTS);
             return `Welcome back, ${formData.username}!`;
           } else {

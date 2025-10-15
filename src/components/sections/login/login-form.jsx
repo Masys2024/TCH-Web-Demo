@@ -37,14 +37,19 @@ export function LoginForm({ className, ...props }) {
       await toast.promise(sleep(2000), {
         loading: "Signing in...",
         success: () => {
-          setLoading(false);
-          router.push(INTERNAL_LINKS.ACTIVE_STUDENTS);
-          return `Welcome back, ${formData.username}!`;
+          if (!formData.username === "admin" && !formData.pass === "admin") {
+            router.push(INTERNAL_LINKS.ACTIVE_STUDENTS);
+            return `Welcome back, ${formData.username}!`;
+          } else {
+            throw new Error("User Not Found");
+          }
         },
-        error: "Error during login",
+        error: "User Not Found",
       });
     } catch (error) {
       toast.error(error.message || "Something went wrong");
+      setLoading(false);
+    } finally {
       setLoading(false);
     }
   };
